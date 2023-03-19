@@ -20,9 +20,8 @@ const Statistic = async (req,res) => {
               {$count: "total"} 
              ])
         
-      
-      res.send({ TotalSale, TotalSoldItems, NotSold });
-      console.log(sum);
+     
+      return res.status(200).json({ TotalSale, TotalSoldItems, NotSold })
   
       }catch(err){
         res.send(err);

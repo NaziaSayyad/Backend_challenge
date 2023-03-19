@@ -11,8 +11,8 @@ const BarChart = async(req,res) =>{
        output: {"count": { $sum: 1 }}}}
        ])
        
-    res.send(final_data)
-}catch(err){
+    res.status(200).json(final_data)
+  }catch(err){
     res.send(err);
 }
 }

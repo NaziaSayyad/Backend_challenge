@@ -3,25 +3,25 @@ const data = require("../Models/data.model");
 const Statistic = async (req,res) => {
     const {month} = req.body;
       try{
-      let sum = sold = notsold = 0;
-      const final_data = await data.find( );
-      final_data.map((el) => {
-        // console.log(el.dateOfSale);
-        let d= new Date(el.dateOfSale)
-        // console.log(d.getMonth());
-        if(month == d.getMonth()){
-          sum += el.price;
-          if(el.sold){
-            sold++;
-          }
-          else{
-            notsold++;
-          }
-        }
-        
-      })
       
-      res.send({ sum , sold, notsold });
+        const TotalSale = await data.aggregate([   
+            {$project: {'month': { $month: { date: { $toDate: "$dateOfSale" } } },  price: 1}},  
+            {$match: {'month': month}},   
+            {$group: {_id: null,total: { $sum: "$price" }}} 
+        ])
+         const TotalSoldItems = await data.aggregate([   
+            {$project: {'month': { $month: { date: { $toDate: "$dateOfSale" } } },sold: 1}},  
+            {$match: {'month': month, sold: true}},
+            { $count: "total"} 
+            ])
+         const NotSold = await data.aggregate([ 
+            {$project: { 'month': { $month: { date: { $toDate: "$dateOfSale" } } },sold: 1}},  
+            {$match: { 'month': month, sold: false}}, 
+              {$count: "total"} 
+             ])
+        
+      
+      res.send({ TotalSale, TotalSoldItems, NotSold });
       console.log(sum);
   
       }catch(err){
@@ -30,4 +30,3 @@ const Statistic = async (req,res) => {
    
   }
   module.exports = Statistic;
-  

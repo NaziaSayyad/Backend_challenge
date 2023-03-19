@@ -2,28 +2,16 @@ const data = require("../Models/data.model");
 
 const PieChart = async(req,res) =>{
     const{ month} = req.body;
-  
     try{
-        let obj = {};
-  
-        const final_data = await data.find( );
-        final_data.map((el) => {
-            let d= new Date(el.dateOfSale)
-             if(month == d.getMonth()){
-                let temp = el.category;
-                if(obj[temp] == undefined) {
-                        obj[temp] =1
-                    }
-                    else{
-                        obj[temp]++;
-                    }
-                  
-             }
-          
-        })
-        res.send( {msg : "Total Items of the unique Category" , obj } );
-        
-      }catch(err){
+      const final_data = await data.aggregate([  
+         { $project: {"month":{ $month:{ date: { $toDate: "$dateOfSale" } } },category: 1}},  
+         { $match: {  "month": month }},  
+         {$group: {   _id: "$category",TotalItems: { $sum: 1 }  }   } ])
+         
+         res.send( {msg : "Total Items of the unique Category" ,final_data } );  
+      }
+      
+      catch(err){
           res.send(err);
       }
   }
